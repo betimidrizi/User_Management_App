@@ -1,29 +1,42 @@
 import { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  setUsers,
+  addUser,
+  deleteUser
+} from "../redux/usersSlice";
+
 import {
   Grid,
-  TextField,
-  Button,
   Card,
   CardContent,
-  Typography
+  Typography,
+  Button,
+  TextField
 } from "@mui/material";
 import { Link } from "react-router-dom";
 
 function UserList() {
-  const [users, setUsers] = useState([]);
+  const dispatch = useDispatch();
+  const users = useSelector(state => state.users.list);
+
   const [search, setSearch] = useState("");
-  const [sortAsc, setSortAsc] = useState(true);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
 
   useEffect(() => {
-    fetch("https://jsonplaceholder.typicode.com/users")
-      .then(res => res.json())
-      .then(data => setUsers(data));
-  }, []);
+    if (users.length === 0) {
+      fetch("https://jsonplaceholder.typicode.com/users")
+        .then(res => res.json())
+        .then(data => dispatch(setUsers(data)));
+    }
+  }, [dispatch, users.length]);
 
-  const addUser = () => {
-    if (!name || !email) return alert("Name and Email required");
+  const handleAddUser = () => {
+    if (!name || !email) {
+      alert("Name and Email required");
+      return;
+    }
 
     const newUser = {
       id: Date.now(),
@@ -32,43 +45,28 @@ function UserList() {
       company: { name: "Local User" }
     };
 
-    setUsers([newUser, ...users]);
+    dispatch(addUser(newUser));
     setName("");
     setEmail("");
   };
 
-  const filteredUsers = users
-    .filter(
-      u =>
-        u.name.toLowerCase().includes(search.toLowerCase()) ||
-        u.email.toLowerCase().includes(search.toLowerCase())
-    )
-    .sort((a, b) =>
-      sortAsc
-        ? a.name.localeCompare(b.name)
-        : b.name.localeCompare(a.name)
-    );
+  const filteredUsers = users.filter(
+    user =>
+      user.name.toLowerCase().includes(search.toLowerCase()) ||
+      user.email.toLowerCase().includes(search.toLowerCase())
+  );
 
   return (
     <>
       <TextField
         fullWidth
-        label="Search users..."
-        variant="outlined"
-        sx={{ marginBottom: 2 }}
+        label="Search users"
+        sx={{ mb: 2 }}
         onChange={(e) => setSearch(e.target.value)}
       />
 
-      <Button
-        variant="contained"
-        sx={{ marginBottom: 3 }}
-        onClick={() => setSortAsc(!sortAsc)}
-      >
-        Sort
-      </Button>
-
-      {/* Add User Form */}
-      <Grid container spacing={2} sx={{ marginBottom: 4 }}>
+      {/* Add User */}
+      <Grid container spacing={2} sx={{ mb: 3 }}>
         <Grid item xs={12} md={5}>
           <TextField
             fullWidth
@@ -88,20 +86,28 @@ function UserList() {
         </Grid>
 
         <Grid item xs={12} md={2}>
-          <Button fullWidth variant="contained" onClick={addUser}>
+          <Button
+            fullWidth
+            variant="contained"
+            onClick={handleAddUser}
+          >
             Add
           </Button>
         </Grid>
       </Grid>
 
-      {/* Users Grid */}
+      {/* Users */}
       <Grid container spacing={3}>
         {filteredUsers.map(user => (
           <Grid item xs={12} sm={6} md={4} key={user.id}>
-            <Card sx={{ height: "100%" }}>
+            <Card>
               <CardContent>
-                <Typography variant="h6">{user.name}</Typography>
+                <Typography variant="h6">
+                  {user.name}
+                </Typography>
+
                 <Typography>{user.email}</Typography>
+
                 <Typography color="text.secondary">
                   {user.company?.name}
                 </Typography>
@@ -109,9 +115,18 @@ function UserList() {
                 <Button
                   component={Link}
                   to={`/user/${user.id}`}
-                  sx={{ marginTop: 2 }}
+                  sx={{ mt: 1 }}
                 >
-                  View Details
+                  Edit
+                </Button>
+
+                <Button
+                  color="error"
+                  onClick={() =>
+                    dispatch(deleteUser(user.id))
+                  }
+                >
+                  Delete
                 </Button>
               </CardContent>
             </Card>

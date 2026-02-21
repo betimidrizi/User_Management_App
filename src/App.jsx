@@ -8,11 +8,13 @@ function App() {
     <>
       <AppBar position="static">
         <Toolbar>
-          <Typography variant="h6">User Management App</Typography>
+          <Typography variant="h6">
+            Users Management
+          </Typography>
         </Toolbar>
       </AppBar>
 
-      <Container sx={{ marginTop: 4 }}>
+      <Container sx={{ mt: 4 }}>
         <Routes>
           <Route path="/" element={<UserList />} />
           <Route path="/user/:id" element={<UserDetails />} />

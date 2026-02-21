@@ -1,30 +1,63 @@
-import { useParams } from "react-router-dom";
-import { useEffect, useState } from "react";
-import { Card, CardContent, Typography } from "@mui/material";
+import { useParams, useNavigate } from "react-router-dom";
+import { useSelector, useDispatch } from "react-redux";
+import { updateUser } from "../redux/usersSlice";
+import { useState } from "react";
+import { TextField, Button, Card, CardContent } from "@mui/material";
 
 function UserDetails() {
   const { id } = useParams();
-  const [user, setUser] = useState(null);
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
 
-  useEffect(() => {
-    fetch(`https://jsonplaceholder.typicode.com/users/${id}`)
-      .then(res => res.json())
-      .then(data => setUser(data));
-  }, [id]);
+  const user = useSelector(state =>
+    state.users.list.find(u => u.id === Number(id))
+  );
 
-  if (!user) return <Typography>Loading...</Typography>;
+  const [name, setName] = useState(user?.name || "");
+  const [email, setEmail] = useState(user?.email || "");
+
+  if (!user) return <h2>User not found</h2>;
+
+  const handleUpdate = () => {
+    const updatedUser = {
+      ...user,
+      name,
+      email
+    };
+
+    dispatch(updateUser(updatedUser));
+    navigate("/");
+  };
 
   return (
-    <Card>
+    <Card sx={{ maxWidth: 500, margin: "auto", mt: 5 }}>
       <CardContent>
-        <Typography variant="h5">{user.name}</Typography>
-        <Typography>Email: {user.email}</Typography>
-        <Typography>Phone: {user.phone}</Typography>
-        <Typography>Website: {user.website}</Typography>
 
-        <Typography sx={{ marginTop: 2 }}>
-          Address: {user.address.street}, {user.address.city}
-        </Typography>
+        <Button onClick={() => navigate("/")}>
+          Back
+        </Button>
+
+        <h2>Edit User</h2>
+
+        <TextField
+          fullWidth
+          label="Name"
+          value={name}
+          sx={{ mb: 2 }}
+          onChange={(e) => setName(e.target.value)}
+        />
+
+        <TextField
+          fullWidth
+          label="Email"
+          value={email}
+          sx={{ mb: 2 }}
+          onChange={(e) => setEmail(e.target.value)}
+        />
+
+        <Button variant="contained" onClick={handleUpdate}>
+          Update User
+        </Button>
       </CardContent>
     </Card>
   );
