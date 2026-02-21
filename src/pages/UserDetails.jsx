@@ -1,7 +1,7 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { updateUser } from "../redux/usersSlice";
-import { useState } from "react"; // Add this import!
+import { useState } from "react";
 import {
   Card,
   CardContent,
@@ -37,7 +37,7 @@ function UserDetails() {
     state.users.list.find(u => u.id === Number(id))
   );
 
-  const [name, setName] = useState(user?.name || ""); // Fixed: setName, not setname
+  const [name, setName] = useState(user?.name || "");
   const [email, setEmail] = useState(user?.email || "");
 
   if (!user) {
@@ -61,8 +61,8 @@ function UserDetails() {
     dispatch(
       updateUser({
         ...user,
-        name: name, // Fixed: use name state, not setname
-        email: email, // Fixed: use email state, not setEmail
+        name: name,
+        email: email,
       })
     );
     navigate("/");

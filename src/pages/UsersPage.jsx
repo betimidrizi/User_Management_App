@@ -7,11 +7,17 @@ import {
   Fade,
   Box,
   Typography,
-  Paper
+  Paper,
+  Menu,
+  MenuItem,
+  IconButton
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import AddIcon from "@mui/icons-material/Add";
 import PeopleAltIcon from "@mui/icons-material/PeopleAlt";
+import SortIcon from "@mui/icons-material/Sort";
+import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
+import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
 import { useDispatch, useSelector } from "react-redux";
 import {
   setUsers,
@@ -87,6 +93,25 @@ const ResultsInfo = styled(Typography)(({ theme }) => ({
   paddingLeft: theme.spacing(1),
 }));
 
+const SortContainer = styled(Box)(({ theme }) => ({
+  display: 'flex',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  marginBottom: theme.spacing(2),
+  flexWrap: 'wrap',
+  gap: theme.spacing(1),
+}));
+
+const SortButton = styled(Button)(({ theme }) => ({
+  borderRadius: '50px',
+  borderColor: '#e2e8f0',
+  color: '#4a5568',
+  '&:hover': {
+    borderColor: '#667eea',
+    background: '#f7fafc',
+  },
+}));
+
 function UsersPage() {
   const dispatch = useDispatch();
   const users = useSelector(state => state.users.list);
@@ -97,6 +122,12 @@ function UsersPage() {
   const [email, setEmail] = useState("");
   const [snackbar, setSnackbar] = useState(false);
   const [loading, setLoading] = useState(false);
+  
+  // Sorting states
+  const [sortBy, setSortBy] = useState("name");
+  const [sortOrder, setSortOrder] = useState("asc");
+  const [sortAnchorEl, setSortAnchorEl] = useState(null);
+  const openSort = Boolean(sortAnchorEl);
 
   useEffect(() => {
     if (users.length === 0) {
@@ -132,10 +163,43 @@ function UsersPage() {
     setSnackbar(true);
   };
 
-  const filteredUsers = users.filter(
-    user =>
-      user.name.toLowerCase().includes(search.toLowerCase()) ||
-      user.email.toLowerCase().includes(search.toLowerCase())
+  // Sorting function
+  const sortUsers = (usersToSort) => {
+    return [...usersToSort].sort((a, b) => {
+      let aValue, bValue;
+      
+      switch(sortBy) {
+        case 'name':
+          aValue = a.name.toLowerCase();
+          bValue = b.name.toLowerCase();
+          break;
+        case 'email':
+          aValue = a.email.toLowerCase();
+          bValue = b.email.toLowerCase();
+          break;
+        case 'company':
+          aValue = a.company?.name?.toLowerCase() || '';
+          bValue = b.company?.name?.toLowerCase() || '';
+          break;
+        default:
+          aValue = a.name.toLowerCase();
+          bValue = b.name.toLowerCase();
+      }
+      
+      if (sortOrder === 'asc') {
+        return aValue < bValue ? -1 : aValue > bValue ? 1 : 0;
+      } else {
+        return aValue > bValue ? -1 : aValue < bValue ? 1 : 0;
+      }
+    });
+  };
+
+  const filteredAndSortedUsers = sortUsers(
+    users.filter(
+      user =>
+        user.name.toLowerCase().includes(search.toLowerCase()) ||
+        user.email.toLowerCase().includes(search.toLowerCase())
+    )
   );
 
   return (
@@ -171,10 +235,67 @@ function UsersPage() {
           {/* Search bar */}
           <SearchBar setSearch={setSearch} />
 
+          {/* Sorting Controls */}
+          <SortContainer>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <SortButton
+                variant="outlined"
+                startIcon={<SortIcon />}
+                onClick={(e) => setSortAnchorEl(e.currentTarget)}
+              >
+                Sort by: {sortBy.charAt(0).toUpperCase() + sortBy.slice(1)}
+              </SortButton>
+              
+              <IconButton
+                onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
+                sx={{
+                  border: '1px solid #e2e8f0',
+                  borderRadius: '50%',
+                  color: '#667eea',
+                  '&:hover': {
+                    background: '#f7fafc',
+                  },
+                }}
+                size="small"
+              >
+                {sortOrder === 'asc' ? <ArrowUpwardIcon /> : <ArrowDownwardIcon />}
+              </IconButton>
+            </Box>
+            
+            <Typography variant="body2" color="text.secondary">
+              {filteredAndSortedUsers.length} user{filteredAndSortedUsers.length !== 1 ? 's' : ''}
+            </Typography>
+          </SortContainer>
+
+          <Menu
+            anchorEl={sortAnchorEl}
+            open={openSort}
+            onClose={() => setSortAnchorEl(null)}
+          >
+            <MenuItem 
+              onClick={() => { setSortBy('name'); setSortAnchorEl(null); }}
+              selected={sortBy === 'name'}
+            >
+              Name
+            </MenuItem>
+            <MenuItem 
+              onClick={() => { setSortBy('email'); setSortAnchorEl(null); }}
+              selected={sortBy === 'email'}
+            >
+              Email
+            </MenuItem>
+            <MenuItem 
+              onClick={() => { setSortBy('company'); setSortAnchorEl(null); }}
+              selected={sortBy === 'company'}
+            >
+              Company
+            </MenuItem>
+          </Menu>
+
           {/* Results info */}
           {search && (
             <ResultsInfo>
-              Found {filteredUsers.length} user{filteredUsers.length !== 1 ? 's' : ''} matching "{search}"
+              Found {filteredAndSortedUsers.length} user{filteredAndSortedUsers.length !== 1 ? 's' : ''} matching "{search}"
             </ResultsInfo>
           )}
 
@@ -187,7 +308,7 @@ function UsersPage() {
             <>
               {/* Users grid */}
               <Grid container spacing={3}>
-                {filteredUsers.map((user, index) => (
+                {filteredAndSortedUsers.map((user, index) => (
                   <Grid item xs={12} sm={6} md={4} lg={3} key={user.id}>
                     <Fade in timeout={500 + (index * 100)}>
                       <div>
@@ -202,7 +323,7 @@ function UsersPage() {
               </Grid>
 
               {/* Empty state */}
-              {filteredUsers.length === 0 && !loading && (
+              {filteredAndSortedUsers.length === 0 && !loading && (
                 <Fade in>
                   <Box sx={{ 
                     textAlign: 'center', 
