@@ -22,7 +22,6 @@ import SearchBar from "../components/SearchBar";
 import UserCard from "../components/UserCard";
 import AddUserDialog from "../components/AddUserDialog";
 
-// Styled components - put these at the top of your file, after imports
 const StyledContainer = styled(Container)(({ theme }) => ({
   paddingTop: theme.spacing(2),
   paddingBottom: theme.spacing(6),
