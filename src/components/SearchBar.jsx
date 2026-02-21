@@ -1,10 +1,13 @@
+import { TextField } from "@mui/material";
+
 function SearchBar({ setSearch }) {
   return (
-    <input
-      type="text"
-      placeholder="Search by name or email"
+    <TextField
+      fullWidth
+      placeholder="Search users..."
+      variant="outlined"
+      sx={{ mb: 3 }}
       onChange={(e) => setSearch(e.target.value)}
-      style={{ margin: "10px 0", padding: "5px" }}
     />
   );
 }

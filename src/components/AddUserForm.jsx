@@ -1,47 +1,44 @@
-import { useState } from "react";
+import { Grid, TextField, Button, Paper } from "@mui/material";
 
-function AddUserForm({ addUser }) {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-
-    if (!name || !email) {
-      alert("Name and Email are required");
-      return;
-    }
-
-    addUser({
-      name,
-      email,
-      company: { name: "Local User" }
-    });
-
-    setName("");
-    setEmail("");
-  };
-
+function AddUserForm({
+  name,
+  email,
+  setName,
+  setEmail,
+  handleAddUser
+}) {
   return (
-    <form onSubmit={handleSubmit} style={{ margin: "20px 0" }}>
-      <h3>Add User</h3>
+    <Paper sx={{ p: 3, mb: 3 }}>
+      <Grid container spacing={2}>
+        <Grid item xs={12} md={5}>
+          <TextField
+            fullWidth
+            label="Name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+          />
+        </Grid>
 
-      <input
-        type="text"
-        placeholder="Name"
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-      />
+        <Grid item xs={12} md={5}>
+          <TextField
+            fullWidth
+            label="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+        </Grid>
 
-      <input
-        type="email"
-        placeholder="Email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-      />
-
-      <button type="submit">Add</button>
-    </form>
+        <Grid item xs={12} md={2}>
+          <Button
+            fullWidth
+            variant="contained"
+            onClick={handleAddUser}
+          >
+            Add User
+          </Button>
+        </Grid>
+      </Grid>
+    </Paper>
   );
 }
 

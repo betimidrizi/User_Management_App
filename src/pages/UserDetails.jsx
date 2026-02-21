@@ -2,7 +2,13 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { updateUser } from "../redux/usersSlice";
 import { useState } from "react";
-import { TextField, Button, Card, CardContent } from "@mui/material";
+import {
+  Card,
+  CardContent,
+  TextField,
+  Button,
+  Stack
+} from "@mui/material";
 
 function UserDetails() {
   const { id } = useParams();
@@ -19,45 +25,47 @@ function UserDetails() {
   if (!user) return <h2>User not found</h2>;
 
   const handleUpdate = () => {
-    const updatedUser = {
-      ...user,
-      name,
-      email
-    };
-
-    dispatch(updateUser(updatedUser));
+    dispatch(
+      updateUser({
+        ...user,
+        name,
+        email
+      })
+    );
     navigate("/");
   };
 
   return (
-    <Card sx={{ maxWidth: 500, margin: "auto", mt: 5 }}>
+    <Card sx={{ maxWidth: 500, margin: "auto", mt: 6 }}>
       <CardContent>
+        <Stack spacing={2}>
+          <Button onClick={() => navigate("/")}>
+            Back
+          </Button>
 
-        <Button onClick={() => navigate("/")}>
-          Back
-        </Button>
+          <TextField
+            label="Name"
+            value={name}
+            onChange={(e) =>
+              setName(e.target.value)
+            }
+          />
 
-        <h2>Edit User</h2>
+          <TextField
+            label="Email"
+            value={email}
+            onChange={(e) =>
+              setEmail(e.target.value)
+            }
+          />
 
-        <TextField
-          fullWidth
-          label="Name"
-          value={name}
-          sx={{ mb: 2 }}
-          onChange={(e) => setName(e.target.value)}
-        />
-
-        <TextField
-          fullWidth
-          label="Email"
-          value={email}
-          sx={{ mb: 2 }}
-          onChange={(e) => setEmail(e.target.value)}
-        />
-
-        <Button variant="contained" onClick={handleUpdate}>
-          Update User
-        </Button>
+          <Button
+            variant="contained"
+            onClick={handleUpdate}
+          >
+            Update User
+          </Button>
+        </Stack>
       </CardContent>
     </Card>
   );
